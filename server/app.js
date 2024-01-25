@@ -6,15 +6,20 @@ const helmet = require('helmet');
 // const router = express.Router();
 var cors = require('cors')
 
+var AWS = require('aws-sdk');
+
 app.use(cors())
 
 app.use(helmet())
-app.use('/', rateLimit())
+
+// UNCOMMENT THIS LINE AFTER DEBUGGING IS OVER
+//app.use('/', rateLimit()) 
 
 // Data sanitization against XSS
 app.use(xss());
 
 app.get("/db/list", (req, res) => {
+    console.log("Listing db....")
     res.status(200).send("<h1>Success...</h1>")
 })
 
