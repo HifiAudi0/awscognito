@@ -18,9 +18,13 @@ app.use(helmet())
 // Data sanitization against XSS
 app.use(xss());
 
+const UserController = require('./user.controller.js');
+
 app.get("/db/list", (req, res) => {
     console.log("Listing db....")
     res.status(200).send("<h1>Success...</h1>")
 })
+
+app.get(`/list`, UserController.findByID);
 
 module.exports = app;
