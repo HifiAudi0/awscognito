@@ -111,11 +111,13 @@ const DatabaseDisplay = (props) => {
     var radioInputElement = document.getElementById(`myRadio-${props.UserId}`);
     var pointsInputElement = document.getElementById(`myInput-${props.UserId}`);
 
+    // Enable the corrosponding points text box when the radio button is checked.
     if (radioInputElement.checked) { pointsInputElement.disabled = false }
     if (!radioInputElement.checked) { pointsInputElement.disabled = true }
 
+    // All of the radio buttons that are not currently selected, disable the input for
+    // all points input text box
     const allInputBtns = document.querySelectorAll(".formInputPoints")
-
     allInputBtns.forEach((input) => {
       if (input.id != `myInput-${props.UserId}`) { input.disabled = true; }
     });
