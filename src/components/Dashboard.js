@@ -34,6 +34,10 @@ const Dashboard = () => {
     logout();
   };
 
+  const saveChanges = () => {
+    console.log("Saving changes....")
+  }
+
   return (
     <div className='Dashboard'>
       <Button
@@ -53,12 +57,13 @@ const Dashboard = () => {
           <th>Points</th>
         </tr>
         {
-          database && database.map((oneEntry) => (
-            <DatabaseDisplay UserId={oneEntry.UserId.S} UserName={oneEntry.UserName.S} Points={oneEntry.Points.N} />
+          database && database.map((oneEntry, index) => (
+            <DatabaseDisplay key={index} UserId={oneEntry.UserId.S} UserName={oneEntry.UserName.S} Points={oneEntry.Points.N} />
           ))
         }
 
       </table>
+      <button className="saveChangesBtn" type="button" onClick={saveChanges}>Save Changes</button>
     </div>
   )
 }
@@ -73,7 +78,9 @@ function DatabaseDisplay(props) {
       <tr>
         <td>{props.UserId}</td>
         <td>{props.UserName}</td>
-        <td>{props.Points}</td>
+        {/* <td>{props.Points}</td> */}
+        <td><input className="formInputPoints" name="myInput" defaultValue={props.Points} />
+        </td>
       </tr>
     </>
   )
