@@ -38,6 +38,10 @@ const Dashboard = () => {
     console.log("Saving changes....")
   }
 
+  const cancelChanges = () => {
+    console.log("Cancelling.....")
+  }
+
   return (
     <div className='Dashboard'>
       <Button
@@ -58,28 +62,46 @@ const Dashboard = () => {
         </tr>
         {
           database && database.map((oneEntry, index) => (
-            <DatabaseDisplay key={index} UserId={oneEntry.UserId.S} UserName={oneEntry.UserName.S} Points={oneEntry.Points.N} />
+            <DatabaseDisplay key={oneEntry.UserId.S} UserId={oneEntry.UserId.S} UserName={oneEntry.UserName.S} Points={oneEntry.Points.N} />
           ))
         }
 
       </table>
       <button className="saveChangesBtn" type="button" onClick={saveChanges}>Save Changes</button>
+      <button className="cancelChangesBtn" type="button" onClick={cancelChanges}>Cancel</button>
     </div>
   )
 }
 
 function DatabaseDisplay(props) {
-  console.log("props UserId S..........", props.UserId.S)
-  console.log("props User Id ========================", props.UserId)
+  const [inputValue, setInputValue] = useState(props.Points);
+  const [isValueChanged, setIsValueChanged] = useState(false);
 
-  console.log("Points ^^^^^^^^^^^^^^^^^^^^^", props.Points)
+  // console.log("props UserId S..........", props.UserId.S)
+  // console.log("props User Id ========================", props.UserId)
+
+  // console.log("Points ^^^^^^^^^^^^^^^^^^^^^", props.Points)
+
+  const handleInputChange = (e) => {
+    const newValue = e.target.value;
+    console.log(`Input for UserId ${props.UserId} changed:`, newValue);
+    setInputValue(newValue);
+    // You can perform additional actions or update state as needed
+    setIsValueChanged(true);
+  };
+
+  // Access the current value of the input field using the 'inputValue' state
+  const currentValue = inputValue;
+
+  console.log("current value", currentValue)
   return (
     <>
       <tr>
         <td>{props.UserId}</td>
         <td>{props.UserName}</td>
         {/* <td>{props.Points}</td> */}
-        <td><input className="formInputPoints" name="myInput" defaultValue={props.Points} />
+
+        <td><input className="formInputPoints" name={`myInput-${props.UserId}`} value={inputValue} defaultValue={props.Points} onChange={handleInputChange} />
         </td>
       </tr>
     </>
