@@ -52,6 +52,7 @@ const Dashboard = () => {
     console.log('Cancelling.....');
     // Reset the 'changes' state to discard any unsaved changes
     setChanges({});
+    window.location.reload(); // Refresh the page so all changes are discarded.
   };
 
   const handleInputChange = (userId, newValue) => {
