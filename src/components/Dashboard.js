@@ -1,131 +1,145 @@
-import { Button } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import { Button } from '@mui/material';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import userpool from '../userpool'
+import userpool from '../userpool';
 import { logout } from '../services/authenticate';
-import axios from "axios";
+import axios from 'axios';
 
 const Dashboard = () => {
-
   const Navigate = useNavigate();
-  const [database, setDatabase] = useState([])
+  const [database, setDatabase] = useState([]);
+  const [changes, setChanges] = useState({});
 
   useEffect(() => {
-    let user = userpool.getCurrentUser();
+    const user = userpool.getCurrentUser();
     console.log(user);
     if (!user) {
       Navigate('/login');
     } else {
-      // SuccessLoggedIn();
       const config = {
         method: 'get',
-        url: "http://localhost:3020" + "/scanTable"
+        url: 'http://localhost:3020' + '/scanTable',
       };
       axios(config).then((response) => {
-        var responseDataJson = JSON.parse(response.data)
+        const responseDataJson = JSON.parse(response.data);
         setDatabase(responseDataJson);
-        console.log("RESPONSE...........................", response.data)
+        console.log('RESPONSE...........................', response.data);
       });
-
     }
   }, []);
 
-  const handleLogoout = () => {
+  const handleLogout = () => {
     logout();
   };
 
   const saveChanges = () => {
-    console.log("Saving changes....")
-  }
+    console.log('Saving changes....', changes);
+    // Implement your save logic here using the 'changes' state
+    // For example, send the changes to the server or update the database
+  };
 
   const cancelChanges = () => {
-    console.log("Cancelling.....")
-  }
+    console.log('Cancelling.....');
+    // Reset the 'changes' state to discard any unsaved changes
+    setChanges({});
+  };
+
+  const handleInputChange = (userId, newValue) => {
+    setChanges((prevChanges) => ({
+      ...prevChanges,
+      [userId]: newValue,
+    }));
+  };
 
   return (
     <div className='Dashboard'>
-      <Button
-        style={{ margin: "10px" }}
-        variant='contained'
-        onClick={handleLogoout}
-      >
+      <Button style={{ margin: '10px' }} variant='contained' onClick={handleLogout}>
         Logout
       </Button>
 
       <h1>Response</h1>
 
-      <table id="users">
-        <tr>
-          <th>UserId</th>
-          <th>UserName</th>
-          <th>Points</th>
-        </tr>
-        {
-          database && database.map((oneEntry, index) => (
-            <DatabaseDisplay key={oneEntry.UserId.S} UserId={oneEntry.UserId.S} UserName={oneEntry.UserName.S} Points={oneEntry.Points.N} />
-          ))
-        }
-
+      <table id='users'>
+        <thead>
+          <tr>
+            <th>Edit</th>
+            <th>UserId</th>
+            <th>UserName</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {database &&
+            database.map((oneEntry, index) => (
+              <DatabaseDisplay
+                key={oneEntry.UserId.S}
+                UserId={oneEntry.UserId.S}
+                UserName={oneEntry.UserName.S}
+                Points={oneEntry.Points.N}
+                onInputChange={handleInputChange}
+              />
+            ))}
+        </tbody>
       </table>
-      <button className="saveChangesBtn" type="button" onClick={saveChanges}>Save Changes</button>
-      <button className="cancelChangesBtn" type="button" onClick={cancelChanges}>Cancel</button>
+      <button className='saveChangesBtn' type='button' onClick={saveChanges}>
+        Save Changes
+      </button>
+      <button className='cancelChangesBtn' type='button' onClick={cancelChanges}>
+        Cancel
+      </button>
     </div>
-  )
-}
+  );
+};
 
-function DatabaseDisplay(props) {
+//document.getElementById(previousRadioId).disabled = false;
+//document.getElementById(previousRadioId).disabled = true;
+
+const DatabaseDisplay = (props) => {
   const [inputValue, setInputValue] = useState(props.Points);
-  const [isValueChanged, setIsValueChanged] = useState(false);
-
-  // console.log("props UserId S..........", props.UserId.S)
-  // console.log("props User Id ========================", props.UserId)
-
-  // console.log("Points ^^^^^^^^^^^^^^^^^^^^^", props.Points)
+  //const [previousRadioId, setPreviousRadioId] = useState(0);
 
   const handleInputChange = (e) => {
     const newValue = e.target.value;
     console.log(`Input for UserId ${props.UserId} changed:`, newValue);
     setInputValue(newValue);
-    // You can perform additional actions or update state as needed
-    setIsValueChanged(true);
+    props.onInputChange(props.UserId, newValue);
   };
 
-  // Access the current value of the input field using the 'inputValue' state
-  const currentValue = inputValue;
+  const radioChecked = () => {
+    console.log("user id...................", props.UserId);
 
-  console.log("current value", currentValue)
-  return (
-    <>
-      <tr>
-        <td>{props.UserId}</td>
-        <td>{props.UserName}</td>
-        {/* <td>{props.Points}</td> */}
+    var radioInputElement = document.getElementById(`myRadio-${props.UserId}`);
+    var pointsInputElement = document.getElementById(`myInput-${props.UserId}`);
 
-        <td><input className="formInputPoints" name={`myInput-${props.UserId}`} value={inputValue} defaultValue={props.Points} onChange={handleInputChange} />
-        </td>
-      </tr>
-    </>
-  )
-}
+    if (radioInputElement.checked) { pointsInputElement.disabled = false }
+    if (!radioInputElement.checked) { pointsInputElement.disabled = true }
 
-/*
-async function SuccessLoggedIn() {
+    const allInputBtns = document.querySelectorAll(".formInputPoints")
 
-  const config = {
-    method: 'get',
-    url: "http://localhost:3020" + "/getItem"
+    allInputBtns.forEach((input) => {
+      if (input.id != `myInput-${props.UserId}`) { input.disabled = true; }
+    });
+
   };
-  const response = await axios(config);
-
-  console.log("Response is......", response)
-
 
   return (
-    <>
-      <h1>Response....</h1>
-      {{ response }}
-    </>
-  )
-}
-*/
-export default Dashboard
+    <tr>
+      <input type="radio" className="myRadioBtns" id={`myRadio-${props.UserId}`} name="fav_language" onChange={radioChecked} />
+      <td>{props.UserId}</td>
+      <td>{props.UserName}</td>
+      <td>
+        <input
+          id={`myInput-${props.UserId}`}
+          className='formInputPoints'
+          name={`myInput-${props.UserId}`}
+          value={inputValue}
+          defaultValue={props.Points}
+          onChange={handleInputChange}
+          disabled="disabled"
+        />
+      </td>
+    </tr>
+  );
+};
+
+export default Dashboard;
