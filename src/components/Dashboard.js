@@ -36,6 +36,16 @@ const Dashboard = () => {
     console.log('Saving changes....', changes);
     // Implement your save logic here using the 'changes' state
     // For example, send the changes to the server or update the database
+    for (const [key, value] of Object.entries(changes)) {
+      const config = {
+        method: 'patch',
+        url: 'http://localhost:3020' + `/api/v1/users/${key}/${value}`,
+      };
+      axios(config).then((response) => {
+        const responseDataJson = JSON.parse(response.data);
+        console.log('RESPONSE...........................', response.data);
+      });
+    }
   };
 
   const cancelChanges = () => {
