@@ -2,13 +2,24 @@ import { Button } from '@mui/material';
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import userpool from '../userpool';
-import { logout } from '../services/authenticate';
+import { logout, getAccessToken } from '../services/authenticate';
 import axios from 'axios';
+
+var jwt_token;
+
+console.log("********************RE-RENDER********************")
+// Save token to localStorage
+
 
 const Dashboard = () => {
   const Navigate = useNavigate();
   const [database, setDatabase] = useState([]);
   const [changes, setChanges] = useState({});
+  const [authToken, setAuthToken] = useState(null);
+  // const [accessToken, setAccessToken] = useState(getAccessToken());
+  // console.log(accessToken)
+
+
 
   useEffect(() => {
     const user = userpool.getCurrentUser();
@@ -16,8 +27,26 @@ const Dashboard = () => {
     if (!user) {
       Navigate('/login');
     } else {
+
+
+
+      // Retrieve token from localStorage
+      jwt_token = localStorage.getItem('jwtToken');
+
+      if (jwt_token) {
+        // Set the authentication state using the stored token
+        setAuthToken(jwt_token);
+        // Perform any additional actions based on the presence of the token
+      }
+
+      console.log("................JWT TOKEN is.................", jwt_token);
+      console.log("=================AUTH TOKEN is===========", authToken);
+
       const config = {
         method: 'get',
+        headers: {
+          'Authorization': `Bearer ${jwt_token}`,
+        },
         url: 'http://localhost:3020' + '/scanTable',
       };
       axios(config).then((response) => {
@@ -34,17 +63,23 @@ const Dashboard = () => {
 
   const saveChanges = () => {
     console.log('Saving changes....', changes);
+
+    jwt_token = localStorage.getItem('jwtToken');
     // Implement your save logic here using the 'changes' state
     // For example, send the changes to the server or update the database
     for (const [key, value] of Object.entries(changes)) {
+      console.log("%%%%%%%%%%%%%TOKEN%%%%%%%%%%%%%%%%%%%%%", jwt_token)
       const config = {
         method: 'patch',
+        headers: {
+          'Authorization': `Bearer ${jwt_token}`,
+        },
         url: 'http://localhost:3020' + `/api/v1/users/${key}/${value}`,
       };
       axios(config).then((response) => {
         const responseDataJson = JSON.parse(response.data);
         console.log('RESPONSE...........................', response.data);
-      });
+      }).catch((error) => console.log("Axios Error:", error));
     }
   };
 
