@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import userpool from '../userpool';
 import { logout, getAccessToken } from '../services/authenticate';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
+import * as yup from 'yup';
 
 var jwt_token;
 
@@ -64,6 +66,10 @@ const Dashboard = () => {
   const saveChanges = () => {
     console.log('Saving changes....', changes);
 
+    // SessionStorage is a bit more secure because it deletes the
+    // cookie when browser is closed. But the expiration date is
+    // really fast on this cookie so its about the same with local
+    // storage anyways.
     jwt_token = localStorage.getItem('jwtToken');
     // Implement your save logic here using the 'changes' state
     // For example, send the changes to the server or update the database
@@ -90,7 +96,23 @@ const Dashboard = () => {
     window.location.reload(); // Refresh the page so all changes are discarded.
   };
 
-  const handleInputChange = (userId, newValue) => {
+  const handleInputChange = async (userId, newValue) => {
+
+    newValue = DOMPurify.sanitize(newValue); // santize the input 
+
+    // Validate the input
+    const schema = yup.object().shape({
+      newValue: yup.number().required().positive().integer(),
+    });
+
+    // Validate the input
+    try {
+      await schema.validate({ newValue });
+    } catch (error) {
+      console.error('Validation failed:', error);
+      return;
+    }
+
     setChanges((prevChanges) => ({
       ...prevChanges,
       [userId]: newValue,
